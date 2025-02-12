@@ -10,23 +10,23 @@ python segment_process.py --data_dir "./a_dataset/english/" --window_length 1.0 
 #   --window_length WINDOW_LENGTH window length
 #   --overlap OVERLAP     overlap
 
-python train_MixSAE.py  --data_dir "./a_dataset/english/" --window_length 1.0 --collar 0.0 --pretrain_epochs_main 30 --pretrain_epochs 20 --main_train_epochs 20
+python train_MixSAE.py  --data_dir "./a_dataset/english/" --window_length 1.0 --collar 0.0 --model_type "tiny" --pretrain_epochs_main 30 --pretrain_epochs 20 --main_train_epochs 20
 # Explain of args in train_MOE_CL.py file
+# MixSAE Network Parameters
 
-#MixSAE Network
 # options:
 #   -h, --help            show this help message and exit
 #   --data_dir DATA_DIR   dataset directory
-#   --input_dim INPUT_DIM
-#                         input dimension (based on Whisper version output)
 #   --n-classes N_CLASSES
-#                         output dimension
+#                         output dimension - n_speakers (default: 2)
 #   --lr LR               learning rate (default: 1e-4)
 #   --wd WD               weight decay (default: 5e-4)
 #   --batch-size BATCH_SIZE
 #                         input batch size for training
+#   --model_type MODEL_TYPE
+#                         model type (default: "tiny")
 #   --hidden-dims HIDDEN_DIMS
-#                         learning rate (default: 1e-4)
+#                         hidden dimensions for autoencoders (default: [256, 128, 64, 32])
 #   --latent_dim LATENT_DIM
 #                         latent space dimension
 #   --n-clusters N_CLUSTERS
