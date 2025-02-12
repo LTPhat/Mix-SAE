@@ -2,7 +2,7 @@
 This repository is the implementation of *'Towards Unsupervised Speaker Diarization System for Multilingual Telephone Calls Using Pre-trained Whisper Model and Mixture of Sparse Autoencoders'*.
 
 ## Dataset preparation
-Prepare dataset folder as followed:
+Prepare your own dataset folder as followed:
 ```                  
       ├── dataset                   
       │  ├── english 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ```
 ### 2) Run 
 - Download Whisper model weights (.pt) and put them into ``pre_trained_model/`` folder (``tiny.pt`` available).
-- Change arguments (described in ```run.sh``` file) based on the settings.
+- Change model arguments (described in ```run.sh``` file) based on the settings.
 - Run script
   
   ```sh
