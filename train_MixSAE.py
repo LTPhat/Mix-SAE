@@ -18,10 +18,8 @@ parser = argparse.ArgumentParser(description='MixSAE Network')
 # Dataset parameters
 parser.add_argument('--data_dir', default='./a_dataset/english/',
                     help='dataset directory')
-parser.add_argument('--input_dim', type=int, default=384,
-                    help='input dimension (based on Whisper version output)')
 parser.add_argument('--n-classes', type=int, default=2,
-                    help='output dimension')
+                    help='output dimension -  n_speaker (default: 2)')
 
 # Training parameters
 parser.add_argument('--lr', type=float, default=1e-3,
@@ -32,8 +30,9 @@ parser.add_argument('--batch-size', type=int, default=16,
                     help='input batch size for training')
 
 # Model parameters
+parser.add_argument("--model_type", type = str, default="tiny", help="model type")
 parser.add_argument('--hidden-dims', default=[256, 128, 64, 32],
-                    help='learning rate (default: 1e-4)')
+                    help='hidden dim for autoencoders (default: [256, 128, 64, 32])')
 parser.add_argument('--latent_dim', type=int, default=2,
                     help='latent space dimension')
 parser.add_argument('--n-clusters', type=int, default=2,
@@ -66,12 +65,13 @@ parser.add_argument('--collar', type=float, default= 0.0,
                     help='collar param for DER')
 
 args = parser.parse_args()
+embedding_dims = {"tiny": 384, 'small': 768, 'base': 512, 'medium':1024, 'large': 1280}
 label_dir = args.data_dir + "/label"
 segment_dir = args.data_dir + "/segments_{}".format(args.window_length)
 label_dir = args.data_dir + "/label"
 window_length = args.window_length
 overlap = args.overlap
-
+input_dim = embedding_dims[args.model_type]
 sample_list = sorted(os.listdir(segment_dir))
 label_list = sorted(os.listdir(label_dir))
 
@@ -90,12 +90,12 @@ def main():
 
         # # --------------------------- DEEP CLUSTERING ------------------------------------
 
-        train_dataset = CustomDataset(sample_dir=sample_path, embed_dim=args.input_dim)
+        train_dataset = CustomDataset(sample_dir=sample_path, embed_dim=input_dim)
         # train_dataset = CustomDataset(sample_dir=sample_path)
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False)
 
-        test_dataset = CustomDataset(sample_dir=sample_path, embed_dim=args.input_dim)
+        test_dataset = CustomDataset(sample_dir=sample_path, embed_dim=input_dim)
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle= False)
 
         #------------------MOE SPARITY CL------------------------------------
