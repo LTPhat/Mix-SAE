@@ -29,7 +29,7 @@ if not os.path.exists(SEGMENT_DIR):
 
 # Load model
 whisper_model = whisper.load_model(model_type, run_device)
-embedding_dims = {"tiny": 384, 'small': 384, 'base': 512, 'medium':1024}
+# embedding_dims = {"tiny": 384, 'small': 768, 'base': 512, 'medium':1024, 'large': 1280}
 
 
 
