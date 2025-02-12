@@ -6,7 +6,7 @@ import os
 
 
 class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, sample_dir, embed_dim = 384, train = False, time = 2):
+    def __init__(self, sample_dir, embed_dim, train = False, time = 2):
         """
         Class to create embedding dataset from extracted embeddings
         train = False --> Don't duplicate training set
