@@ -13,13 +13,13 @@ from create_DER import createDER
 
 
 ######### NOTE: ARGUMENT ########################
-parser = argparse.ArgumentParser(description='Deep Clustering Network')
+parser = argparse.ArgumentParser(description='MixSAE Network')
 
 # Dataset parameters
-parser.add_argument('--data_dir', default='./test_dataset/english/',
+parser.add_argument('--data_dir', default='./a_dataset/english/',
                     help='dataset directory')
 parser.add_argument('--input_dim', type=int, default=384,
-                    help='input dimension')
+                    help='input dimension (based on Whisper version output)')
 parser.add_argument('--n-classes', type=int, default=2,
                     help='output dimension')
 
@@ -32,11 +32,6 @@ parser.add_argument('--batch-size', type=int, default=16,
                     help='input batch size for training')
 
 # Model parameters
-parser.add_argument('--lamda', type=float, default=1,
-                    help='coefficient of the reconstruction loss')
-parser.add_argument('--beta', type=float, default=0.01, 
-                    help=('coefficient of the regularization term on '
-                            'clustering'))
 parser.add_argument('--hidden-dims', default=[256, 128, 64, 32],
                     help='learning rate (default: 1e-4)')
 parser.add_argument('--latent_dim', type=int, default=2,
@@ -54,17 +49,17 @@ parser.add_argument('--log-interval', type=int, default=20,
 parser.add_argument("--window_length", type = float, default= 0.2, help="window length")
 parser.add_argument("--overlap", type = float, default= 0, help="overlap")
 parser.add_argument('--rho', type=float, default=0.2,
-                    help='whether use pre-training')
-parser.add_argument('--pretrain_epochs', type=int, default=20,
+                    help='Sparsity hyperparameter of single sparse autoencoder')
+parser.add_argument('--pretrain_epochs', type=int, default=30,
                     help='epochs for pretraining k-autoencoders')
-parser.add_argument('--pretrain_epochs_main', type=int, default= 30,
+parser.add_argument('--pretrain_epochs_main', type=int, default= 20,
                     help='epochs for pretraining the main autoencoder for the whole dataset')
 parser.add_argument('--pretrain', type=bool, default=True,
                     help='whether use pre-training')
 parser.add_argument('--main_train_epochs', type=int, default = 20,
-                    help='main_train epochs')
+                    help='epochs for main-training phase')
 parser.add_argument('--sparsity_param', type=float, default=0.2,
-                    help='sparsity constract param')
+                    help='sparsity lost param')
 parser.add_argument('--cl_loss_param', type=float, default= 0.1,
                     help='clasification loss param')
 parser.add_argument('--collar', type=float, default= 0.0,
@@ -132,7 +127,7 @@ def main():
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)        
     
     #-- Save result
-    csv_path = f"{result_dir}MOE_CL_{language}_{window_length}.csv"
+    csv_path = f"{result_dir}MixSAE_{language}_{window_length}.csv"
     # Save the updated DataFrame back to the CSV
     df.to_csv(csv_path, index=False)
     # Calculate the average MOE_CL score
@@ -141,7 +136,7 @@ def main():
     # Write the average score to the JSON file
     with open(json_path, 'w') as file:
         json.dump({"avg_DER": avg_score}, file, indent=4)
-    print("DONE")
+    print("----------Training DONE----------------")
 
 if __name__ == "__main__":
     print(args)

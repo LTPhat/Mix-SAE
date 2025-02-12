@@ -15,66 +15,6 @@ from sklearn.manifold import TSNE
 import random
 random.seed(10)
 
-######### NOTE: ARGUMENT ########################
-parser = argparse.ArgumentParser(description='Deep Clustering Network')
-
-# Dataset parameters
-parser.add_argument('--data_dir', default='./a_dataset/english/',
-                    help='dataset directory')
-parser.add_argument('--input_dim', type=int, default=384,
-                    help='input dimension')
-parser.add_argument('--n-classes', type=int, default=2,
-                    help='output dimension')
-
-# Training parameters
-parser.add_argument('--lr', type=float, default=1e-3,
-                    help='learning rate (default: 1e-4)')
-parser.add_argument('--wd', type=float, default=1e-4,
-                    help='weight decay (default: 5e-4)')
-parser.add_argument('--batch-size', type=int, default=16,
-                    help='input batch size for training')
-
-# Model parameters
-parser.add_argument('--lamda', type=float, default=1,
-                    help='coefficient of the reconstruction loss')
-parser.add_argument('--beta', type=float, default=0.01, 
-                    help=('coefficient of the regularization term on '
-                            'clustering'))
-parser.add_argument('--hidden-dims', default=[256, 128, 64, 32],
-                    help='learning rate (default: 1e-4)')
-parser.add_argument('--latent_dim', type=int, default=2,
-                    help='latent space dimension')
-parser.add_argument('--n-clusters', type=int, default=2,
-                    help='number of clusters in the latent space')
-
-
-# Utility parameters
-parser.add_argument('--n-jobs', type=int, default=1,
-                    help='number of jobs to run in parallel')
-parser.add_argument('--log-interval', type=int, default=20,
-                    help=('how many batches to wait before logging the '
-                            'training status'))
-parser.add_argument("--window_length", type = float, default= 0.2, help="window length")
-parser.add_argument("--overlap", type = float, default= 0, help="overlap")
-parser.add_argument('--rho', type=float, default=0.2,
-                    help='whether use pre-training')
-parser.add_argument('--pretrain_epochs', type=int, default=20,
-                    help='epochs for pretraining k-autoencoders')
-parser.add_argument('--pretrain_epochs_main', type=int, default= 30,
-                    help='epochs for pretraining the main autoencoder for the whole dataset')
-parser.add_argument('--pretrain', type=bool, default=True,
-                    help='whether use pre-training')
-parser.add_argument('--main_train_epochs', type=int, default = 20,
-                    help='main_train epochs')
-parser.add_argument('--sparsity_param', type=float, default=0.2,
-                    help='sparsity constract param')
-parser.add_argument('--cl_loss_param', type=float, default= 0.1,
-                    help='clasification loss param')
-parser.add_argument('--collar', type=float, default= 0.0,
-                    help='collar param for DER')
-
-args = parser.parse_args()
-
 
 class AutoEncoder(nn.Module):
 
@@ -339,14 +279,14 @@ class MoESparseAutoencodersCL(nn.Module):
     def __init__(self, args):
         super(MoESparseAutoencodersCL, self).__init__()
         self.args = args
-        self.input_dim = args.input_dim
+        self.input_dim = self.args.input_dim
         self.output_dim = self.input_dim
-        self.hidden_dims = args.hidden_dims
-        self.latent_dim = args.latent_dim
-        self.n_clusters = args.n_clusters
-        self.pretrain_epochs = args.pretrain_epochs
-        self.pretrain_epochs_main = args.pretrain_epochs_main
-        self.main_train_epochs = args.main_train_epochs
+        self.hidden_dims = self.args.hidden_dims
+        self.latent_dim = self.args.latent_dim
+        self.n_clusters = self.args.n_clusters
+        self.pretrain_epochs = self.args.pretrain_epochs
+        self.pretrain_epochs_main = self.args.pretrain_epochs_main
+        self.main_train_epochs = self.args.main_train_epochs
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Define main autoencoder at pretraining
         self.main_autoencoder = AutoEncoder(args=args)
@@ -355,7 +295,7 @@ class MoESparseAutoencodersCL(nn.Module):
         self.psedo_label = None
         # Clustering algorithm for pre-training
         self.cluster_algo = None
-        self.cl_loss_param = args.cl_loss_param
+        self.cl_loss_param = self.args.cl_loss_param
 
         # Define autoencoder expert in mixture
         self.moe = {}
@@ -472,7 +412,7 @@ class MoESparseAutoencodersCL(nn.Module):
         """
         #---------Training main_autoencoder---------------
         criterion = nn.MSELoss()
-        optimizer = torch.optim.Adam(self.main_autoencoder.parameters(), lr=args.lr, weight_decay = args.wd)
+        optimizer = torch.optim.Adam(self.main_autoencoder.parameters(), lr=self.args.lr, weight_decay = self.args.wd)
 
         self.train_one_autoencoder(autoencoder=self.main_autoencoder, optimizer=optimizer,
                                    criterion=criterion, data_loader= dataloader, 
@@ -521,8 +461,8 @@ class MoESparseAutoencodersCL(nn.Module):
             # Extract data for specific expert i
             data_expert_i = dataset[self.cluster_algo.labels_ == i]
             data_expert_i = AutoEncoderDataset(data = data_expert_i)
-            dataset_expert_i = DataLoader(data_expert_i, batch_size = args.batch_size, shuffle = False)
-            optimizer = torch.optim.Adam(self.moe[i].parameters(), lr=args.lr, weight_decay = args.wd)
+            dataset_expert_i = DataLoader(data_expert_i, batch_size = self.args.batch_size, shuffle = False)
+            optimizer = torch.optim.Adam(self.moe[i].parameters(), lr=self.args.lr, weight_decay = self.args.wd)
             criterion = nn.MSELoss()
             # Train expert_i
             self.train_one_autoencoder(autoencoder=self.moe[i], optimizer=optimizer,
@@ -563,7 +503,7 @@ class MoESparseAutoencodersCL(nn.Module):
             self.moe[i].to(self.device)        
             self.moe[i].train()
             
-        optimizer = torch.optim.Adam(params, lr=args.lr, weight_decay = args.wd)
+        optimizer = torch.optim.Adam(params, lr=self.args.lr, weight_decay = self.args.wd)
 
         for epoch in range(self.main_train_epochs):
             running_loss = 0.0
