@@ -46,7 +46,7 @@ python train_MixSAE.py  --data_dir "./a_dataset/english/" --window_length 1.0 --
 #   --main_train_epochs MAIN_TRAIN_EPOCHS
 #                         epochs for main-training phase
 #   --sparsity_param SPARSITY_PARAM
-#                         sparsity lost param
+#                         sparsity loss param
 #   --cl_loss_param CL_LOSS_PARAM
 #                         clasification loss param
 #   --collar COLLAR       collar param for DER
