@@ -4,10 +4,11 @@ import numpy as np
 import whisper
 import torch
 import argparse
+from vad import EnergyVAD
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--data_dir", type=str, default= "./a_dataset/english/", help="data wav dir")
+parser.add_argument("--data_dir", type=str, default= "./a_dataset/spanish/", help="data wav dir")
 parser.add_argument("--model_type", type = str, default="tiny", help="model type")
 parser.add_argument("--run_device", type = str, default="cpu", help="run device")
 parser.add_argument("--window_length", type = float, default= 0.2, help="window length")
@@ -76,10 +77,18 @@ def extract_segment_embedding(segment_dir, save_segment_dir, window_length):
     """
 
     audio = whisper.load_audio(segment_dir)
-    # print("AUDIO SHAPE:", audio.shape)
+    # load audio file in "audio" variable
 
+    vad = EnergyVAD(
+        sample_rate= 16000,
+        frame_length = 25, # in milliseconds
+        frame_shift = 20, # in milliseconds
+        energy_threshold = 0.05, 
+        pre_emphasis = 0.95,
+    ) # default values are used here
+
+    voice_activity = vad(audio) # returns a boolean array indicating whether a frame is speech or not
     mel = whisper.log_mel_spectrogram(audio).to(whisper_model.device)    
-    # print("MEL SHAPE", mel.shape)
     #--- this code to create the correct shape of mel spectrogram
     while True:
         nF, nT = np.shape(mel)
@@ -99,8 +108,10 @@ def extract_segment_embedding(segment_dir, save_segment_dir, window_length):
     emb_1d  = np.mean(emb_1d, axis=0)
 
     emb_1d = np.expand_dims(emb_1d, axis = 0)
-    # print("Speaker embedding shape", emb_1d.shape)
-
+   
+    if not voice_activity[0]:
+        return np.zeros_like(emb_1d)
+    
     np.save(save_segment_dir + '/{}.npy'.format(segment_dir.split("/")[-1]), emb_1d, allow_pickle=True)
 
     return emb_1d 
