@@ -181,3 +181,4 @@ watchdog==6.0.0
 wcwidth==0.2.13
 whisper-openai==1.0.0
 yarl==1.18.3
+vad
